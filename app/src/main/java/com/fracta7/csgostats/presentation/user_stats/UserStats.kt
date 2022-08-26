@@ -3,17 +3,18 @@ package com.fracta7.csgostats.presentation.user_stats
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.navigation.NavController
 import androidx.room.Room
 import com.fracta7.csgostats.R
@@ -25,6 +26,7 @@ import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
 import com.fracta7.csgostats.presentation.ui.theme.Shapes
 import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.ui.theme.surface
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +99,7 @@ fun UserStats(
         if (it.dpr > maxDPR) maxDPR = it.dpr
         if (it.duration > maxDuration) maxDuration = it.duration
     }
-    if(userStats.isNotEmpty()) totalKD = kills.toFloat() / deaths.toFloat()
+    if (userStats.isNotEmpty()) totalKD = kills.toFloat() / deaths.toFloat()
 
     var ctchance = 0f
     var hspercent = 0f
@@ -117,460 +119,476 @@ fun UserStats(
     if (totalMatches != 0) assistpercent = (averageAssists / assists.toFloat()) * 100f
     if (totalMatches != 0) deathpercent = (averageDeaths / deaths.toFloat()) * 100f
     if (totalMatches != 0) durationpercent = (averageDuration / duration.toFloat()) * 100f
-    totalkdchance = if(totalKD>2.0f) 100f else (totalKD/2.0f)*100f
-    averagekdchance = if(averageKD>2.0f) 100f else (averageKD/2.0f)*100f
-    dprchance = if(dpr>120f) 100f else (dpr/120f)*100
-    maxdprchance = if(maxDPR>120f) 100f else (maxDPR/120f)*100f
+    totalkdchance = if (totalKD > 2.0f) 100f else (totalKD / 2.0f) * 100f
+    averagekdchance = if (averageKD > 2.0f) 100f else (averageKD / 2.0f) * 100f
+    dprchance = if (dpr > 120f) 100f else (dpr / 120f) * 100
+    maxdprchance = if (maxDPR > 120f) 100f else (maxDPR / 120f) * 100f
 
     CSGOStatsTheme(darkTheme = true) {
         Surface {
             BackHandler(onBack = { activity?.finish() })
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "User Stats",
-                    modifier = Modifier.padding(48.dp),
-                    fontSize = Typography.headlineLarge.fontSize
-                )
-                Card(
-                    shape = Shapes.large,
-                    modifier = Modifier
-                        .requiredSize(400.dp, 500.dp)
-                        .padding(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = surface)
-                ) {
-                    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                        item {
-                            Card(shape = Shapes.large) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_hs),
-                                            contentDescription = "Icon kills",
-                                            modifier = Modifier.requiredSize(32.dp)
-                                        )
-                                        Text(text = "$kills kills")
-                                    }
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_assist),
-                                            contentDescription = "Icon assists",
-                                            modifier = Modifier.requiredSize(32.dp)
-                                        )
-                                        Text(text = "$assists assists")
-                                    }
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_death),
-                                            contentDescription = "Icon deaths",
-                                            modifier = Modifier.requiredSize(32.dp)
-                                        )
-                                        Text(text = "$deaths deaths")
-                                    }
-                                }
-                            }
-                        }
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average HS%: $hs% of $highestHS%")
-                                    }
-                                    CustomProgressBar(percentage = hspercent)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Highest HS%: $highestHS%")
-                                    }
-                                    CustomProgressBar(percentage = highestHS)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Total games as CT start: $startedAsCT out of $totalMatches")
-
-                                    }
-                                    CustomProgressBar(percentage = ctchance)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average DPR: $dpr")
-
-                                    }
-                                    CustomProgressBar(percentage = dprchance)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Max DPR: $maxDPR")
-
-                                    }
-                                    CustomProgressBar(percentage = maxdprchance)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Total KD: $totalKD")
-
-                                    }
-                                    CustomProgressBar(percentage = totalkdchance)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average KD per game: $averageKD")
-
-                                    }
-                                    CustomProgressBar(percentage = averagekdchance)
-                                }
-                            }
-                        }
-
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average MVPs per game: $averageMVPs")
-
-                                    }
-                                    CustomProgressBar(percentage = mvppercent)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average kills per game: $averageKills")
-
-                                    }
-                                    CustomProgressBar(percentage = killpercent)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average assists per game: $averageAssists")
-
-                                    }
-                                    CustomProgressBar(percentage = assistpercent)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average deaths per game: $averageDeaths")
-
-                                    }
-                                    CustomProgressBar(percentage = deathpercent)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Average duration of the game per game: $averageDuration")
-
-                                    }
-                                    CustomProgressBar(percentage = durationpercent)
-                                }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Total MVPs: $mvps")
-
+            Scaffold(
+                content = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "User Stats",
+                            modifier = Modifier.padding(48.dp),
+                            fontSize = Typography.headlineLarge.fontSize
+                        )
+                        Card(
+                            shape = Shapes.large,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = surface)
+                        ) {
+                            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+                                item {
+                                    Card(shape = Shapes.large) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceEvenly
+                                        ) {
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_hs),
+                                                    contentDescription = "Icon kills",
+                                                    modifier = Modifier.requiredSize(32.dp)
+                                                )
+                                                Text(text = "$kills kills")
+                                            }
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_assist),
+                                                    contentDescription = "Icon assists",
+                                                    modifier = Modifier.requiredSize(32.dp)
+                                                )
+                                                Text(text = "$assists assists")
+                                            }
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_death),
+                                                    contentDescription = "Icon deaths",
+                                                    modifier = Modifier.requiredSize(32.dp)
+                                                )
+                                                Text(text = "$deaths deaths")
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Total Duration: $duration minutes")
-
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average HS%: $hs% of $highestHS%")
+                                            }
+                                            CustomProgressBar(percentage = hspercent)
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Highest kill count: $maxKills")
-
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Highest HS%: $highestHS%")
+                                            }
+                                            CustomProgressBar(percentage = highestHS)
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
 
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Highest assist count: $maxAssists")
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Total games as CT start: $startedAsCT out of $totalMatches")
 
+                                            }
+                                            CustomProgressBar(percentage = ctchance)
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
 
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Highest death count: $maxDeath")
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average DPR: $dpr")
 
+                                            }
+                                            CustomProgressBar(percentage = dprchance)
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
 
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Highest MVP count: $maxMVPs")
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Max DPR: $maxDPR")
 
+                                            }
+                                            CustomProgressBar(percentage = maxdprchance)
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
 
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Highest DPR value: $maxDPR")
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Total KD: $totalKD")
 
+                                            }
+                                            CustomProgressBar(percentage = totalkdchance)
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
 
-                        item {
-                            Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.padding(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = "Longest game duration: $maxDuration minutes")
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average KD per game: $averageKD")
 
+                                            }
+                                            CustomProgressBar(percentage = averagekdchance)
+                                        }
                                     }
                                 }
+
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average MVPs per game: $averageMVPs")
+
+                                            }
+                                            CustomProgressBar(percentage = mvppercent)
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average kills per game: $averageKills")
+
+                                            }
+                                            CustomProgressBar(percentage = killpercent)
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average assists per game: $averageAssists")
+
+                                            }
+                                            CustomProgressBar(percentage = assistpercent)
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average deaths per game: $averageDeaths")
+
+                                            }
+                                            CustomProgressBar(percentage = deathpercent)
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Average duration of the game per game: $averageDuration")
+
+                                            }
+                                            CustomProgressBar(percentage = durationpercent)
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Total MVPs: $mvps")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Total Duration: $duration minutes")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Highest kill count: $maxKills")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Highest assist count: $maxAssists")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Highest death count: $maxDeath")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Highest MVP count: $maxMVPs")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Highest DPR value: $maxDPR")
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                }
+
+                                item {
+                                    Card(shape = Shapes.large, modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "Longest game duration: $maxDuration minutes")
+
+                                            }
+                                        }
+                                    }
+                                }
+
                             }
+                        }
+                        Spacer(modifier = Modifier.padding(0.dp, 4.dp))
+
+/*                    Button(
+                        onClick = {
+                            navController.navigate(Screens.AddStat.route)
+                        },
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                                contentDescription = "Icon add"
+                            )
+                            Text(text = "Add a new match")
                         }
 
                     }
-                }
-                Spacer(modifier = Modifier.padding(0.dp, 4.dp))
+*/
+                        BackHandler(onBack = { activity?.finish() })
 
-                Button(
-                    onClick = {
+                    }
+                },
+                floatingActionButton = {
+                    Button(onClick = {
                         navController.navigate(Screens.AddStat.route)
-                    },
-                    modifier = Modifier
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_add_24),
                             contentDescription = "Icon add"
                         )
-                        Text(text = "Add a new match")
                     }
-
                 }
+            )
 
-                BackHandler(onBack = { activity?.finish() })
 
-            }
         }
     }
 

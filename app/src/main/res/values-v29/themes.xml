@@ -5,9 +5,4 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:enforceNavigationBarContrast">false</item>
     </style>
-
-    <style name="Theme.CSGOStats" parent="Theme.Material3.Dark" tools:ignore="DuplicateDefinition">
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-    </style>
 </resources>

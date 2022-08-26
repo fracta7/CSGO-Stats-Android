@@ -1,5 +1,6 @@
 package com.fracta7.csgostats.presentation.match_history
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -26,6 +27,8 @@ import com.fracta7.csgostats.data.local.UserStatsEntity
 import com.fracta7.csgostats.presentation.navigation.Screens
 import com.fracta7.csgostats.presentation.ui.theme.*
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchHistory(
     navController: NavController
@@ -40,55 +43,81 @@ fun MatchHistory(
     val userStats: List<UserStatsEntity> = db.userStatsDao().getAll()
 
     CSGOStatsTheme(darkTheme = true) {
-        BackHandler(onBack = { activity?.finish() })
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Match History",
-                modifier = Modifier.padding(48.dp),
-                fontSize = Typography.headlineLarge.fontSize
-            )
-            Card(
-                shape = Shapes.large,
+
+        Scaffold(content = {
+            Column(
                 modifier = Modifier
-                    .size(500.dp, 500.dp)
-                    .padding(12.dp),
-                colors = CardDefaults.cardColors(containerColor = surface)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LazyColumn {
-                    items(userStats) { userStat ->
-                        MatchCard(
-                            map = userStat.map,
-                            duration = userStat.duration,
-                            date = userStat.date,
-                            kills = userStat.kills,
-                            assists = userStat.assists,
-                            deaths = userStat.deaths,
-                            hs = userStat.hs,
-                            dpr = userStat.dpr,
-                            mvps = userStat.mvps,
-                            matchScore = userStat.matchScore
-                        )
+                Text(
+                    text = "Match History",
+                    modifier = Modifier.padding(48.dp),
+                    fontSize = Typography.headlineLarge.fontSize
+                )
+                Card(
+                    shape = Shapes.large,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = surface)
+                ) {
+                    LazyColumn {
+                        items(userStats) { userStat ->
+                            MatchCard(
+                                map = userStat.map,
+                                duration = userStat.duration,
+                                date = userStat.date,
+                                kills = userStat.kills,
+                                assists = userStat.assists,
+                                deaths = userStat.deaths,
+                                hs = userStat.hs,
+                                dpr = userStat.dpr,
+                                mvps = userStat.mvps,
+                                matchScore = userStat.matchScore
+                            )
+                        }
                     }
                 }
-            }
-            Button(onClick = {
-                openDialog.value = true
-            }, colors = ButtonDefaults.buttonColors(containerColor = errorContainer)) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Icon(painter = painterResource(id = R.drawable.ic_baseline_delete_forever_24), contentDescription = "delete", tint = onErrorContainer)
-                    Text(text = "Clear History", color = onErrorContainer)
-                }
+/*                Button(
+                    onClick = {
+                        openDialog.value = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = errorContainer),
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_delete_forever_24),
+                            contentDescription = "delete",
+                            tint = onErrorContainer
+                        )
+                        Text(text = "Clear History", color = onErrorContainer)
+                    }
 
+                } */
+                DialogAlert(navController = navController, db = db, openDialog = openDialog)
             }
-            DialogAlert(navController = navController, db = db, openDialog = openDialog)
-        }
+        },
+            floatingActionButton = {
+                Button(
+                    onClick = {
+                        openDialog.value = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = errorContainer),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_delete_forever_24),
+                        contentDescription = "delete",
+                        tint = onErrorContainer
+                    )
+                }
+            })
+
+
     }
     BackHandler(onBack = { activity?.finish() })
 }
