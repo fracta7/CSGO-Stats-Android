@@ -4,18 +4,20 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import dagger.Provides
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserStatsDao {
     @Query("SELECT * FROM userstats")
-    fun getAll(): List<UserStatsEntity>
+    fun getAll(): Flow<List<UserStatsEntity>>
 
     @Insert
-    fun insertAll(vararg userStats: UserStatsEntity)
+    suspend fun insertAll(vararg userStats: UserStatsEntity)
 
     @Delete
-    fun delete(stat: UserStatsEntity)
+    suspend fun delete(stat: UserStatsEntity)
 
     @Query("DELETE FROM userstats")
-    fun deleteTable()
+    suspend fun deleteTable()
 }

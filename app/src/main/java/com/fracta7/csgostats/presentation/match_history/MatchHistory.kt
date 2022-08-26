@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,21 +23,36 @@ import com.fracta7.csgostats.data.local.AppDatabase
 import com.fracta7.csgostats.data.local.UserStatsEntity
 import com.fracta7.csgostats.presentation.navigation.Screens
 import com.fracta7.csgostats.presentation.ui.theme.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun MatchHistory(
     navController: NavController
 ) {
     val activity = LocalContext.current as? Activity
+    var stats by remember{ mutableStateOf(listOf<UserStatsEntity>())}
+
     val db = Room.databaseBuilder(
         LocalContext.current,
         AppDatabase::class.java, "app-database"
-    ).allowMainThreadQueries().build()
+    ).build()
+
+    GlobalScope.launch(Dispatchers.IO) {
+        val statsFlow = db.userStatsDao().getAll()
+
+        statsFlow.collect(){
+            stats = it
+        }
+    }
 
     val openDialog = remember { mutableStateOf(false) }
-    val userStats: List<UserStatsEntity> = db.userStatsDao().getAll()
+
 
     CSGOStatsTheme(darkTheme = true) {
 
@@ -50,11 +62,11 @@ fun MatchHistory(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
+                /*Text(
                     text = "Match History",
                     modifier = Modifier.padding(48.dp),
                     fontSize = Typography.headlineLarge.fontSize
-                )
+                )*/
                 Card(
                     shape = Shapes.large,
                     modifier = Modifier
@@ -63,7 +75,7 @@ fun MatchHistory(
                     colors = CardDefaults.cardColors(containerColor = surface)
                 ) {
                     LazyColumn {
-                        items(userStats) { userStat ->
+                        items(stats) { userStat ->
                             MatchCard(
                                 map = userStat.map,
                                 duration = userStat.duration,
@@ -229,6 +241,7 @@ fun MatchCard(
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun DialogAlert(navController: NavController, db: AppDatabase, openDialog: MutableState<Boolean>) {
     if (openDialog.value) {
@@ -246,7 +259,9 @@ fun DialogAlert(navController: NavController, db: AppDatabase, openDialog: Mutab
             text = { Text(text = "This action will DELETE ALL MATCHES!") },
             confirmButton = {
                 TextButton(onClick = {
-                    db.userStatsDao().deleteTable()
+                    GlobalScope.launch {
+                        db.userStatsDao().deleteTable()
+                    }
                     openDialog.value = false
                     navController.navigate(Screens.MatchHistory.route)
                 }) {

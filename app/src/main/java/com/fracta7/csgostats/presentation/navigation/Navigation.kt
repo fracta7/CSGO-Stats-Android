@@ -1,9 +1,12 @@
 package com.fracta7.csgostats.presentation.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -18,6 +21,7 @@ import com.fracta7.csgostats.presentation.main_screen.GunStats
 import com.fracta7.csgostats.presentation.main_screen.MainScreen
 import com.fracta7.csgostats.presentation.main_screen.MapStats
 import com.fracta7.csgostats.presentation.match_history.MatchHistory
+import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.user_stats.UserStats
 import kotlinx.coroutines.launch
 
@@ -27,6 +31,8 @@ import kotlinx.coroutines.launch
 fun Navigation() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
+
+    var title by remember { mutableStateOf("Steam Statistics") }
     val scope = rememberCoroutineScope()
     val items = listOf(
         0,
@@ -39,6 +45,21 @@ fun Navigation() {
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(48.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.mipmap.ic_launcher_round),
+                        contentDescription = ""
+                    )
+                    Text(
+                        text = "CS:GO Statistics",
+                        fontSize = Typography.headlineLarge.fontSize,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
+                }
+
                 items.forEach { item ->
                     NavigationDrawerItem(
                         icon = {
@@ -63,10 +84,20 @@ fun Navigation() {
                         selected = item == selectedItem.value,
                         onClick = {
                             selectedItem.value = item
-                            if (selectedItem.value == 0) navController.navigate(Screens.MainScreen.route)
-                            if (selectedItem.value == 1) navController.navigate(Screens.UserStats.route)
-                            if (selectedItem.value == 2) navController.navigate(Screens.MatchHistory.route)
                             scope.launch { drawerState.close() }
+                            if (selectedItem.value == 0) {
+                                navController.navigate(Screens.MainScreen.route)
+                                title = "Steam Statistics"
+                            }
+                            if (selectedItem.value == 1) {
+                                navController.navigate(Screens.UserStats.route)
+                                title = "User Statistics"
+                            }
+                            if (selectedItem.value == 2) {
+                                navController.navigate(Screens.MatchHistory.route)
+                                title = "Match History"
+                            }
+
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
@@ -74,40 +105,64 @@ fun Navigation() {
             }
         },
         content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(2.dp)
-            ) {
-                NavHost(
-                    navController = navController,
-                    startDestination = Screens.MainScreen.route
-                ) {
-                    composable(route = Screens.MainScreen.route)
-                    {
-                        MainScreen(navController = navController)
+            Scaffold(
+                content = {
+                    Surface {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(2.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_baseline_reorder_24),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .requiredSize(32.dp)
+                                        .clickable { scope.launch { drawerState.open() } }
+                                )
+                                Text(
+                                    text = title,
+                                    modifier = Modifier.padding(48.dp),
+                                    fontSize = Typography.headlineLarge.fontSize
+                                )
+                            }
+                            NavHost(
+                                navController = navController,
+                                startDestination = Screens.MainScreen.route
+                            ) {
+                                composable(route = Screens.MainScreen.route)
+                                {
+                                    MainScreen(navController = navController)
+                                }
+                                composable(route = Screens.UserStats.route) {
+                                    UserStats(navController = navController)
+                                }
+                                composable(route = Screens.MatchHistory.route)
+                                {
+                                    MatchHistory(navController = navController)
+                                }
+                                composable(route = Screens.AddStat.route) {
+                                    AddStatScreen(navController = navController)
+                                }
+                                composable(route = Screens.GeneralStats.route) {
+                                    GeneralStats(navController = navController)
+                                }
+                                composable(route = Screens.GunStats.route) {
+                                    GunStats()
+                                }
+                                composable(route = Screens.MapStats.route) {
+                                    MapStats()
+                                }
+                            }
+                        }
                     }
-                    composable(route = Screens.UserStats.route) {
-                        UserStats(navController = navController)
-                    }
-                    composable(route = Screens.MatchHistory.route)
-                    {
-                        MatchHistory(navController = navController)
-                    }
-                    composable(route = Screens.AddStat.route) {
-                        AddStatScreen(navController = navController)
-                    }
-                    composable(route = Screens.GeneralStats.route) {
-                        GeneralStats(navController = navController)
-                    }
-                    composable(route = Screens.GunStats.route) {
-                        GunStats()
-                    }
-                    composable(route = Screens.MapStats.route) {
-                        MapStats()
-                    }
-                }
-            }
+
+                })
+
         }
     )
 }

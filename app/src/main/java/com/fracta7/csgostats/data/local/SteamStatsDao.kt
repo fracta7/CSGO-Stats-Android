@@ -1,18 +1,19 @@
 package com.fracta7.csgostats.data.local
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SteamStatsDao {
     @Query("SELECT * FROM steamstats")
-    fun getAll(): List<SteamStatsEntity>
+    fun getAll(): Flow<List<SteamStatsEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg steamStats: SteamStatsEntity)
+    suspend fun insertAll(vararg steamStats: SteamStatsEntity)
 
     @Delete
-    fun delete(stat: SteamStatsEntity)
+    suspend fun delete(stat: SteamStatsEntity)
 
     @Query("DELETE FROM steamstats")
-    fun deleteTable()
+    suspend fun deleteTable()
 }

@@ -3,12 +3,10 @@ package com.fracta7.csgostats.presentation.user_stats
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,22 +24,34 @@ import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
 import com.fracta7.csgostats.presentation.ui.theme.Shapes
 import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.ui.theme.surface
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun UserStats(
     navController: NavController
 ) {
     val activity = LocalContext.current as? Activity
+
+    var stats by remember{ mutableStateOf(listOf<UserStatsEntity>()) }
     val db = Room.databaseBuilder(
         LocalContext.current,
         AppDatabase::class.java, "app-database"
-    ).allowMainThreadQueries().build()
-    val userStats: List<UserStatsEntity> = db.userStatsDao().getAll()
+    ).build()
 
-    val totalMatches = userStats.size
+    GlobalScope.launch(Dispatchers.IO) {
+        val statsFlow = db.userStatsDao().getAll()
+
+        statsFlow.collect {
+            stats = it
+        }
+    }
+
+    val totalMatches = stats.size
     var kills = 0
     var assists = 0
     var deaths = 0
@@ -64,19 +74,30 @@ fun UserStats(
     var maxMVPs = 0
     var maxDPR = 0f
     var maxDuration = 0
-    if (userStats.isNotEmpty()) {
-        hs = userStats[0].hs!!
-        dpr = userStats[0].hs!!
-        averageKD = userStats[0].kills!!.toFloat() / userStats[0].deaths!!.toFloat()
-        averageKills = userStats[0].kills!!.toFloat()
-        averageAssists = userStats[0].assists!!.toFloat()
-        averageDeaths = userStats[0].deaths!!.toFloat()
-        averageMVPs = userStats[0].mvps!!.toFloat()
-        averageDuration = userStats[0].duration!!.toFloat()
+    var ctchance = 0f
+    var hspercent = 0f
+    var mvppercent = 0f
+    var killpercent = 0f
+    var assistpercent = 0f
+    var deathpercent = 0f
+    var durationpercent = 0f
+    var totalkdchance = 0f
+    var averagekdchance = 0f
+    var dprchance = 0f
+    var maxdprchance = 0f
+
+    if (stats.isNotEmpty()) {
+        hs = stats[0].hs!!
+        dpr = stats[0].hs!!
+        averageKD = stats[0].kills!!.toFloat() / stats[0].deaths!!.toFloat()
+        averageKills = stats[0].kills!!.toFloat()
+        averageAssists = stats[0].assists!!.toFloat()
+        averageDeaths = stats[0].deaths!!.toFloat()
+        averageMVPs = stats[0].mvps!!.toFloat()
+        averageDuration = stats[0].duration!!.toFloat()
     }
 
-
-    userStats.forEach {
+    stats.forEach {
         kills += it.kills!!
         assists += it.assists!!
         deaths += it.deaths!!
@@ -93,25 +114,14 @@ fun UserStats(
         averageDuration = (averageDuration + it.duration.toFloat()) / 2
         if (it.kills > maxKills) maxKills = it.kills
         if (it.deaths > maxDeath) maxDeath = it.deaths
-        if (it.assists > maxAssists) maxAssists = it.deaths
+        if (it.assists > maxAssists) maxAssists = it.assists
         if (it.mvps > maxMVPs) maxMVPs = it.mvps
         if (it.hs > highestHS) highestHS = it.hs
         if (it.dpr > maxDPR) maxDPR = it.dpr
         if (it.duration > maxDuration) maxDuration = it.duration
     }
-    if (userStats.isNotEmpty()) totalKD = kills.toFloat() / deaths.toFloat()
+    if (stats.isNotEmpty()) totalKD = kills.toFloat() / deaths.toFloat()
 
-    var ctchance = 0f
-    var hspercent = 0f
-    var mvppercent = 0f
-    var killpercent = 0f
-    var assistpercent = 0f
-    var deathpercent = 0f
-    var durationpercent = 0f
-    var totalkdchance = 0f
-    var averagekdchance = 0f
-    var dprchance = 0f
-    var maxdprchance = 0f
     if (totalMatches != 0) ctchance = (startedAsCT.toFloat() / totalMatches.toFloat()) * 100f
     if (totalMatches != 0) hspercent = (hs / highestHS) * 100f
     if (totalMatches != 0) mvppercent = (averageMVPs / mvps.toFloat()) * 100f
@@ -134,11 +144,11 @@ fun UserStats(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
+                        /*Text(
                             text = "User Stats",
                             modifier = Modifier.padding(48.dp),
                             fontSize = Typography.headlineLarge.fontSize
-                        )
+                        )*/
                         Card(
                             shape = Shapes.large,
                             modifier = Modifier
@@ -193,7 +203,7 @@ fun UserStats(
                                                 modifier = Modifier.padding(4.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "Average HS%: $hs% of $highestHS%")
+                                                Text(text = "Average HS%: $hs%")
                                             }
                                             CustomProgressBar(percentage = hspercent)
                                         }
@@ -304,7 +314,7 @@ fun UserStats(
                                                 modifier = Modifier.padding(4.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "Average KD per game: $averageKD")
+                                                Text(text = "Average KD per game: $averageKD}")
 
                                             }
                                             CustomProgressBar(percentage = averagekdchance)
@@ -598,7 +608,5 @@ fun UserStats(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewUserUI() {
-    UserStats(
-        navController = NavController(LocalContext.current)
-    )
+
 }

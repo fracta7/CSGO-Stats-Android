@@ -40,11 +40,11 @@ fun MainScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+/*            Text(
                 text = "Steam Stats",
                 modifier = Modifier.padding(48.dp),
                 fontSize = Typography.headlineLarge.fontSize
-            )
+            )*/
 
             Card(modifier = Modifier
                 .padding(4.dp)

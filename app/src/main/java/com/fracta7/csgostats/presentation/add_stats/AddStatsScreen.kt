@@ -1,5 +1,6 @@
 package com.fracta7.csgostats.presentation.add_stats
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +16,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.room.Room
 import com.fracta7.csgostats.data.local.AppDatabase
@@ -23,10 +26,14 @@ import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
 import com.fracta7.csgostats.presentation.ui.theme.Shapes
 import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.ui.theme.surfaceVariant
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 var selectedMap: String? = null
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun AddStatScreen(navController: NavController) {
     val maps = listOf(
@@ -41,11 +48,6 @@ fun AddStatScreen(navController: NavController) {
         "Other"
     )
 
-    val db = Room.databaseBuilder(
-        LocalContext.current,
-        AppDatabase::class.java, "app-database"
-    ).allowMainThreadQueries().build()
-
     var kills by remember { mutableStateOf("") }
     var assists by remember { mutableStateOf("") }
     var deaths by remember { mutableStateOf("") }
@@ -57,6 +59,10 @@ fun AddStatScreen(navController: NavController) {
     var date by remember { mutableStateOf("") }
     var map: Int? = 0
     var startedAsCT by remember { mutableStateOf(false) }
+    val db = Room.databaseBuilder(
+        LocalContext.current,
+        AppDatabase::class.java, "app-database"
+    ).build()
 
     Column(
         modifier = Modifier
@@ -64,11 +70,11 @@ fun AddStatScreen(navController: NavController) {
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
+        /*Text(
             text = "Add Stats",
             modifier = Modifier.padding(48.dp),
             fontSize = Typography.headlineLarge.fontSize
-        )
+        )*/
 
         Card(
             shape = Shapes.large,
@@ -81,7 +87,9 @@ fun AddStatScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val modifier = Modifier.fillMaxWidth().padding(8.dp,0.dp)
+                val modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp, 0.dp)
                 item {
 
                     OutlinedTextField(
@@ -101,7 +109,8 @@ fun AddStatScreen(navController: NavController) {
                         onValueChange = { assists = it },
                         modifier = modifier,
                         label = { Text(text = "Assists") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
                         ),
                         shape = Shapes.large
                     )
@@ -192,9 +201,12 @@ fun AddStatScreen(navController: NavController) {
                     DropdownList(items = maps)
                 }
                 item {
-                    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(text = "Started as CT?", Modifier.padding(end = 8.dp))
-                        Checkbox(checked = startedAsCT, onCheckedChange ={startedAsCT = it})
+                        Checkbox(checked = startedAsCT, onCheckedChange = { startedAsCT = it })
                     }
                 }
             }
@@ -229,21 +241,25 @@ fun AddStatScreen(navController: NavController) {
                     maps[8] -> map = 8
                 }
 
-                db.userStatsDao().insertAll(
-                    UserStatsEntity(
-                        kills = kills.toInt(),
-                        map = map,
-                        duration = duration.toInt(),
-                        date = date,
-                        assists = assists.toInt(),
-                        deaths = deaths.toInt(),
-                        hs = hs.toFloat(),
-                        dpr = dpr.toFloat(),
-                        mvps = mvps.toInt(),
-                        matchScore = matchscore,
-                        startedAsCT = startedAsCT
+
+                GlobalScope.launch {
+                    db.userStatsDao().insertAll(
+                        UserStatsEntity(
+                            kills = kills.toInt(),
+                            map = map,
+                            duration = duration.toInt(),
+                            date = date,
+                            assists = assists.toInt(),
+                            deaths = deaths.toInt(),
+                            hs = hs.toFloat(),
+                            dpr = dpr.toFloat(),
+                            mvps = mvps.toInt(),
+                            matchScore = matchscore,
+                            startedAsCT = startedAsCT
+                        )
                     )
-                )
+                }
+
                 navController.popBackStack()
             }) {
                 Text(text = "Add")
@@ -288,7 +304,7 @@ fun DropdownList(items: List<String>) {
 fun PreviewAdd() {
     CSGOStatsTheme(darkTheme = true) {
         Surface() {
-            AddStatScreen(navController = NavController(LocalContext.current))
+
         }
     }
 }
