@@ -2,6 +2,8 @@ package com.fracta7.csgostats.presentation.user_stats
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,10 +24,8 @@ import com.fracta7.csgostats.presentation.custom.CustomProgressBar
 import com.fracta7.csgostats.presentation.navigation.Screens
 import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
 import com.fracta7.csgostats.presentation.ui.theme.Shapes
-import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.ui.theme.surface
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -37,19 +37,7 @@ fun UserStats(
 ) {
     val activity = LocalContext.current as? Activity
 
-    var stats by remember{ mutableStateOf(listOf<UserStatsEntity>()) }
-    val db = Room.databaseBuilder(
-        LocalContext.current,
-        AppDatabase::class.java, "app-database"
-    ).build()
-
-    GlobalScope.launch(Dispatchers.IO) {
-        val statsFlow = db.userStatsDao().getAll()
-
-        statsFlow.collect {
-            stats = it
-        }
-    }
+    var stats by remember { mutableStateOf(listOf<UserStatsEntity>()) }
 
     val totalMatches = stats.size
     var kills = 0
@@ -57,6 +45,7 @@ fun UserStats(
     var deaths = 0
     var hs = 0f
     var dpr = 0f
+
     var mvps = 0
     var startedAsCT = 0
     var duration = 0
@@ -86,6 +75,24 @@ fun UserStats(
     var dprchance = 0f
     var maxdprchance = 0f
 
+    var isDone by remember { mutableStateOf(false) }
+
+    while (!isDone) {
+        val db = Room.databaseBuilder(
+            LocalContext.current,
+            AppDatabase::class.java, "app-database"
+        ).build()
+        GlobalScope.launch {
+            val statsFlow = db.userStatsDao().getAll()
+
+            statsFlow.collect {
+                stats = it
+                Log.d(TAG, "UserStats: ${stats.size}")
+            }
+        }
+
+        isDone = true
+    }
     if (stats.isNotEmpty()) {
         hs = stats[0].hs!!
         dpr = stats[0].hs!!
@@ -133,6 +140,7 @@ fun UserStats(
     averagekdchance = if (averageKD > 2.0f) 100f else (averageKD / 2.0f) * 100f
     dprchance = if (dpr > 120f) 100f else (dpr / 120f) * 100
     maxdprchance = if (maxDPR > 120f) 100f else (maxDPR / 120f) * 100f
+
 
     CSGOStatsTheme(darkTheme = true) {
         Surface {
@@ -314,7 +322,7 @@ fun UserStats(
                                                 modifier = Modifier.padding(4.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "Average KD per game: $averageKD}")
+                                                Text(text = "Average KD per game: $averageKD")
 
                                             }
                                             CustomProgressBar(percentage = averagekdchance)

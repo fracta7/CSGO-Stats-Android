@@ -42,7 +42,6 @@ fun MatchHistory(
         LocalContext.current,
         AppDatabase::class.java, "app-database"
     ).build()
-
     GlobalScope.launch(Dispatchers.IO) {
         val statsFlow = db.userStatsDao().getAll()
 
@@ -77,16 +76,7 @@ fun MatchHistory(
                     LazyColumn {
                         items(stats) { userStat ->
                             MatchCard(
-                                map = userStat.map,
-                                duration = userStat.duration,
-                                date = userStat.date,
-                                kills = userStat.kills,
-                                assists = userStat.assists,
-                                deaths = userStat.deaths,
-                                hs = userStat.hs,
-                                dpr = userStat.dpr,
-                                mvps = userStat.mvps,
-                                matchScore = userStat.matchScore
+                                userStat
                             )
                         }
                     }
@@ -136,16 +126,7 @@ fun MatchHistory(
 
 @Composable
 fun MatchCard(
-    map: Int?,
-    duration: Int?,
-    date: String?,
-    kills: Int?,
-    assists: Int?,
-    deaths: Int?,
-    hs: Float?,
-    dpr: Float?,
-    mvps: Int?,
-    matchScore: String?
+    userStatsEntity: UserStatsEntity
 ) {
     Card(
         modifier = Modifier
@@ -161,16 +142,16 @@ fun MatchCard(
                 .padding(8.dp)
         ) {
             var painter: Int = R.drawable.map_icon_lobby_mapveto
-            when (map) {
-                0 -> painter = R.drawable.map_icon_de_dust2
+            when (userStatsEntity.map) {
+                0 -> painter = R.drawable.collection_icon_de_dust2
                 1 -> painter = R.drawable.collection_icon_de_inferno
-                2 -> painter = R.drawable.map_icon_de_mirage
-                3 -> painter = R.drawable.map_icon_de_nuke
-                4 -> painter = R.drawable.map_icon_cs_office
-                5 -> painter = R.drawable.map_icon_de_overpass
-                6 -> painter = R.drawable.map_icon_de_train
-                7 -> painter = R.drawable.map_icon_de_vertigo
-                8 -> painter = R.drawable.map_icon_lobby_mapveto
+                2 -> painter = R.drawable.collection_icon_de_mirage
+                3 -> painter = R.drawable.collection_icon_de_nuke
+                4 -> painter = R.drawable.collection_icon_cs_office
+                5 -> painter = R.drawable.collection_icon_de_overpass
+                6 -> painter = R.drawable.collection_icon_de_train
+                7 -> painter = R.drawable.collection_icon_de_vertigo
+                8 -> painter = R.drawable.collection_icon_none
             }
 
             Image(
@@ -183,14 +164,14 @@ fun MatchCard(
 
             Column {
 
-                Text(text = "$matchScore", fontSize = Typography.titleLarge.fontSize)
+                Text(text = "${userStatsEntity.matchScore}", fontSize = Typography.titleLarge.fontSize)
                 Text(
-                    text = "$duration minutes",
+                    text = "${userStatsEntity.duration} minutes",
                     fontSize = Typography.labelSmall.fontSize,
                     fontStyle = FontStyle.Italic
                 )
                 Text(
-                    text = "$date",
+                    text = "${userStatsEntity.date}",
                     fontSize = Typography.labelSmall.fontSize,
                     fontStyle = FontStyle.Italic
                 )
@@ -200,20 +181,20 @@ fun MatchCard(
                 Row {
                     Text(text = "Kills:")
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = kills.toString())
+                    Text(text = userStatsEntity.kills.toString())
 
                 }
                 Spacer(Modifier.padding(4.dp))
                 Row {
                     Text(text = "Deaths:")
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = deaths.toString())
+                    Text(text = userStatsEntity.deaths.toString())
                 }
                 Spacer(Modifier.padding(4.dp))
                 Row {
                     Text(text = "Assists:")
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = assists.toString())
+                    Text(text = userStatsEntity.assists.toString())
                 }
             }
 
@@ -221,20 +202,20 @@ fun MatchCard(
                 Row {
                     Text(text = "HS%:")
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = "$hs%")
+                    Text(text = "${userStatsEntity.hs}%")
 
                 }
                 Spacer(Modifier.padding(4.dp))
                 Row {
                     Text(text = "DPR:")
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = dpr.toString())
+                    Text(text = userStatsEntity.dpr.toString())
                 }
                 Spacer(Modifier.padding(4.dp))
                 Row {
                     Text(text = "MVPs:")
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = mvps.toString())
+                    Text(text = userStatsEntity.mvps.toString())
                 }
             }
         }
@@ -282,39 +263,7 @@ fun DialogAlert(navController: NavController, db: AppDatabase, openDialog: Mutab
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun Preview1() {
-    CSGOStatsTheme(darkTheme = true) {
-        Surface {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                item {
-                    MatchCard(
-                        map = R.drawable.collection_icon_de_mirage,
-                        duration = 49,
-                        date = "17.10.22",
-                        kills = 18,
-                        assists = 2,
-                        deaths = 15,
-                        hs = 65f,
-                        dpr = 78.9f,
-                        mvps = 3,
-                        matchScore = "16:9"
-                    )
-                }
-                item {
-                    MatchCard(
-                        map = R.drawable.collection_icon_de_inferno,
-                        duration = 36,
-                        date = "01.11.22",
-                        kills = 25,
-                        assists = 5,
-                        deaths = 18,
-                        hs = 56f,
-                        dpr = 88.9f,
-                        mvps = 4,
-                        matchScore = "14:16"
-                    )
-                }
-            }
+    CSGOStatsTheme(darkTheme = true){
 
-        }
     }
 }

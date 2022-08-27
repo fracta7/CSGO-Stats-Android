@@ -1,11 +1,11 @@
 package com.fracta7.csgostats.presentation.main_screen
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,21 +18,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.room.Room
+import com.fracta7.csgostats.data.local.AppDatabase
 import com.fracta7.csgostats.data.remote.SteamStatApi
 import com.fracta7.csgostats.domain.model.JSONModel
-import com.fracta7.csgostats.presentation.navigation.Screens
+import com.fracta7.csgostats.domain.model.Stats
 import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
-import com.fracta7.csgostats.presentation.ui.theme.Typography
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 
+@OptIn(DelicateCoroutinesApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MainScreen(
     navController: NavController
 ) {
     val activity = LocalContext.current as? Activity
     val context = LocalContext.current
-    var text by remember { mutableStateOf("test") }
+
+    var statsRemote by remember { mutableStateOf(listOf<Stats>()) }
+
 
     CSGOStatsTheme(darkTheme = true) {
         BackHandler(onBack = { activity?.finish() })
@@ -40,30 +49,10 @@ fun MainScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-/*            Text(
-                text = "Steam Stats",
-                modifier = Modifier.padding(48.dp),
-                fontSize = Typography.headlineLarge.fontSize
-            )*/
-
-            Card(modifier = Modifier
-                .padding(4.dp)
-                .fillMaxWidth()
-                .clickable {
-                    navController.navigate(Screens.GeneralStats.route)
-                }) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "General Statistics", modifier = Modifier.padding(12.dp))
-                }
-
-            }
-
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item {
                     Button(onClick = {
+
                         val retrofit =
                             Retrofit.Builder()
                                 .baseUrl(SteamStatApi.BASE_URL)
@@ -76,22 +65,28 @@ fun MainScreen(
                                 call: Call<JSONModel>,
                                 response: Response<JSONModel>
                             ) {
-                                val playerStatsJSON = response.body()?.playerStats?.stats
-                                text = playerStatsJSON?.get(0)?.value.toString()
+                                statsRemote = response.body()?.playerStats?.stats!!
                             }
 
                             override fun onFailure(call: Call<JSONModel>, t: Throwable) {
                                 Toast.makeText(
-                                    context, "Something went wrong!", Toast.LENGTH_SHORT
+                                    context, "Something went wrong! $t", Toast.LENGTH_SHORT
                                 ).show()
-                                text = "$t"
+
                             }
                         })
                     })
                     {
                         Text(text = "Load data")
                     }
-                    Text(text = text)
+
+                }
+                items(statsRemote.size) { value ->
+                    Text(
+                        text = statsRemote[value].name.toString() + ": " + statsRemote[value].value.toString(),
+                        modifier = Modifier.padding(4.dp)
+                    )
+                    Divider(thickness = 1.dp)
                 }
             }
         }

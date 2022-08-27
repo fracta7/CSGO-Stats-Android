@@ -5,17 +5,19 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.fracta7.csgostats.domain.model.Stats
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [SteamStatsEntity::class, UserStatsEntity::class],
+    entities = [SteamStatsEntity::class, UserStatsEntity::class, Stats::class],
     version = 1,
 
     )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun steamStatsDao(): SteamStatsDao
     abstract fun userStatsDao(): UserStatsDao
+    abstract fun remoteStatsDao(): RemoteStatsDao
 
 /*    companion object {
         @Volatile

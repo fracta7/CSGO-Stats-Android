@@ -1,6 +1,7 @@
 package com.fracta7.csgostats.presentation.add_stats
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,15 +17,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.room.Room
 import com.fracta7.csgostats.data.local.AppDatabase
 import com.fracta7.csgostats.data.local.UserStatsEntity
 import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
 import com.fracta7.csgostats.presentation.ui.theme.Shapes
-import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.ui.theme.surfaceVariant
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -59,6 +57,8 @@ fun AddStatScreen(navController: NavController) {
     var date by remember { mutableStateOf("") }
     var map: Int? = 0
     var startedAsCT by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
     val db = Room.databaseBuilder(
         LocalContext.current,
         AppDatabase::class.java, "app-database"
@@ -70,12 +70,6 @@ fun AddStatScreen(navController: NavController) {
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        /*Text(
-            text = "Add Stats",
-            modifier = Modifier.padding(48.dp),
-            fontSize = Typography.headlineLarge.fontSize
-        )*/
-
         Card(
             shape = Shapes.large,
             modifier = Modifier
@@ -220,15 +214,7 @@ fun AddStatScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.padding(12.dp))
             Button(onClick = {
-                if (kills == "") kills = "0"
-                if (duration == "") duration = "0"
-                if (date == "") date = "0"
-                if (assists == "") assists = "0"
-                if (deaths == "") deaths = "0"
-                if (hs == "") hs = "0"
-                if (dpr == "") dpr = "0"
-                if (mvps == "") mvps = "0"
-                if (matchscore == "") matchscore = "0"
+
                 when (selectedMap) {
                     maps[0] -> map = 0
                     maps[1] -> map = 1
@@ -241,26 +227,34 @@ fun AddStatScreen(navController: NavController) {
                     maps[8] -> map = 8
                 }
 
-
-                GlobalScope.launch {
-                    db.userStatsDao().insertAll(
-                        UserStatsEntity(
-                            kills = kills.toInt(),
-                            map = map,
-                            duration = duration.toInt(),
-                            date = date,
-                            assists = assists.toInt(),
-                            deaths = deaths.toInt(),
-                            hs = hs.toFloat(),
-                            dpr = dpr.toFloat(),
-                            mvps = mvps.toInt(),
-                            matchScore = matchscore,
-                            startedAsCT = startedAsCT
+                val isInputEmpty =
+                    (kills == "" || duration == "" || assists == "" || deaths == "" || mvps == "" || matchscore == ""||date=="")
+                if (!isInputEmpty) {
+                    if (hs == "") hs = "0"
+                    if (dpr == "") dpr = "0"
+                    GlobalScope.launch {
+                        db.userStatsDao().insertAll(
+                            UserStatsEntity(
+                                kills = kills.toInt(),
+                                map = map,
+                                duration = duration.toInt(),
+                                date = date,
+                                assists = assists.toInt(),
+                                deaths = deaths.toInt(),
+                                hs = hs.toFloat(),
+                                dpr = dpr.toFloat(),
+                                mvps = mvps.toInt(),
+                                matchScore = matchscore,
+                                startedAsCT = startedAsCT
+                            )
                         )
-                    )
+                    }
+                    navController.popBackStack()
+                } else{
+                    Toast.makeText(context, "Input is empty!", Toast.LENGTH_SHORT).show()
                 }
 
-                navController.popBackStack()
+
             }) {
                 Text(text = "Add")
             }

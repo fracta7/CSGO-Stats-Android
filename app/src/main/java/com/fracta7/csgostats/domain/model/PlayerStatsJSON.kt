@@ -12,5 +12,5 @@ data class PlayerStatsJSON(
     val gameName: String?,
     @SerializedName("stats")
     @Expose
-    val stats: ArrayList<Stats>?
+    val stats: List<Stats>?
 )

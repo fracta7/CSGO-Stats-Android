@@ -9,18 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.room.Room
 import com.fracta7.csgostats.data.local.AppDatabase
-import com.fracta7.csgostats.data.repository.SteamStatsRepository
-import com.fracta7.csgostats.data.repository.UserStatsRepository
 import com.fracta7.csgostats.presentation.navigation.Navigation
 import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
-import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContent {
             CSGOStatsTheme {
@@ -30,7 +25,6 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     Navigation()
-
                 }
             }
         }
