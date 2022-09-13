@@ -1,7 +1,7 @@
 package com.fracta7.csgostats.data.mapper
 
-import com.fracta7.csgostats.data.local.SteamStatsEntity
-import com.fracta7.csgostats.domain.model.PlayerStatsJSON
+import com.fracta7.csgostats.data.local.steam.SteamStatsEntity
+import com.fracta7.csgostats.data.remote.dto.PlayerStatsJSON
 import com.fracta7.csgostats.domain.model.SteamStats
 
 fun SteamStatsEntity.toSteamStats(): SteamStats {

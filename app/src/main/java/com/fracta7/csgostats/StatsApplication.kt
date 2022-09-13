@@ -1,12 +1,9 @@
 package com.fracta7.csgostats
 
 import android.app.Application
-import androidx.room.Room
-import com.fracta7.csgostats.data.local.AppDatabase
+import dagger.hilt.android.HiltAndroidApp
 
-class StatsApplication(var db: AppDatabase?): Application() {
-    fun getDbInstance(): AppDatabase{
+@HiltAndroidApp
+class StatsApplication : Application() {
 
-        return db as AppDatabase
-    }
 }

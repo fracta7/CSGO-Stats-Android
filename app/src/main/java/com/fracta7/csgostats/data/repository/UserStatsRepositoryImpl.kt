@@ -1,11 +1,9 @@
 package com.fracta7.csgostats.data.repository
 
-import androidx.annotation.WorkerThread
 import com.fracta7.csgostats.data.local.AppDatabase
-import com.fracta7.csgostats.data.local.SteamStatsEntity
-import com.fracta7.csgostats.data.local.UserStatsDao
-import com.fracta7.csgostats.data.local.UserStatsEntity
+import com.fracta7.csgostats.data.local.user.UserStatsEntity
 import com.fracta7.csgostats.data.mapper.toUserStats
+import com.fracta7.csgostats.data.mapper.toUserStatsEntity
 import com.fracta7.csgostats.domain.model.UserStats
 import com.fracta7.csgostats.domain.repository.UserStatsRepository
 import com.fracta7.csgostats.util.Resource
@@ -15,16 +13,32 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UserStatsRepository @Inject constructor(private val userStatsDao: UserStatsDao) {
-    val allStats: Flow<List<UserStatsEntity>> = userStatsDao.getAll()
-
-    @WorkerThread
-    suspend fun insert(stat: UserStatsEntity){
-        userStatsDao.insertAll(stat)
+class UserStatsRepositoryImpl @Inject constructor(private val db: AppDatabase) :
+    UserStatsRepository {
+    private val dao = db.userStatsDao()
+    suspend fun insert(stat: UserStatsEntity) {
+        dao.insertAll(stat)
     }
 
-    @WorkerThread
-    suspend fun deleteAll(){
-        userStatsDao.deleteTable()
+    suspend fun deleteAll() {
+        dao.deleteTable()
+    }
+
+    override suspend fun clearMatches() {
+        dao.deleteTable()
+    }
+
+    override suspend fun insert(stat: UserStats) {
+        dao.insertAll(stat.toUserStatsEntity())
+    }
+
+    override suspend fun getUserStats(): Flow<Resource<List<UserStats>>> {
+        return flow {
+            val userStats = dao.getAll()
+            if (userStats.isEmpty()) emit(Resource.Error("Repository is empty")) else emit(
+                Resource.Success(
+                    data = userStats.map { it.toUserStats() })
+            )
+        }
     }
 }

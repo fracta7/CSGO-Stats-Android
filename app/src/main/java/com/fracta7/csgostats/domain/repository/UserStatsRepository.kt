@@ -5,6 +5,9 @@ import com.fracta7.csgostats.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface UserStatsRepository {
-    suspend fun getUserStats(
-    ): Flow<Resource<List<UserStats>>>
+    suspend fun getUserStats(): Flow<Resource<List<UserStats>>>
+
+    suspend fun insert(stat: UserStats)
+
+    suspend fun clearMatches()
 }

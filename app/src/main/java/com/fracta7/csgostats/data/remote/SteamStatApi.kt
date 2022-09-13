@@ -1,13 +1,8 @@
 package com.fracta7.csgostats.data.remote
 
-import com.fracta7.csgostats.data.local.SteamStatsEntity
-import com.fracta7.csgostats.domain.model.JSONModel
-import com.fracta7.csgostats.domain.model.SteamStats
-import okhttp3.ResponseBody
+import com.fracta7.csgostats.data.remote.dto.JSONModel
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
 
 interface SteamStatApi {
     //http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=6D246C322AF7A2C1D517063C884AE93A&steamid=76561199098153905

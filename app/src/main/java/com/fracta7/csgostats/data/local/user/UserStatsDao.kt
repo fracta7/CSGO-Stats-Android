@@ -1,16 +1,15 @@
-package com.fracta7.csgostats.data.local
+package com.fracta7.csgostats.data.local.user
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import dagger.Provides
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserStatsDao {
     @Query("SELECT * FROM userstats")
-    fun getAll(): Flow<List<UserStatsEntity>>
+    suspend fun getAll(): List<UserStatsEntity>
 
     @Insert
     suspend fun insertAll(vararg userStats: UserStatsEntity)

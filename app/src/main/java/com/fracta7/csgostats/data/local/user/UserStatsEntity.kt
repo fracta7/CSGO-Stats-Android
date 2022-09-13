@@ -1,4 +1,4 @@
-package com.fracta7.csgostats.data.local
+package com.fracta7.csgostats.data.local.user
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

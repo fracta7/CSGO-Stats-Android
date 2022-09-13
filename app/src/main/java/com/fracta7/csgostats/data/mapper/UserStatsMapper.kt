@@ -1,6 +1,6 @@
 package com.fracta7.csgostats.data.mapper
 
-import com.fracta7.csgostats.data.local.UserStatsEntity
+import com.fracta7.csgostats.data.local.user.UserStatsEntity
 import com.fracta7.csgostats.domain.model.UserStats
 
 fun UserStatsEntity.toUserStats(): UserStats {

@@ -1,6 +1,7 @@
-package com.fracta7.csgostats.data.local
+package com.fracta7.csgostats.data.local.steam
 
 import androidx.room.*
+import com.fracta7.csgostats.data.local.steam.SteamStatsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

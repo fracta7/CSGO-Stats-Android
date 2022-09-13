@@ -15,12 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fracta7.csgostats.R
-import com.fracta7.csgostats.data.local.AppDatabase
 import com.fracta7.csgostats.presentation.add_stats.AddStatScreen
-import com.fracta7.csgostats.presentation.main_screen.GeneralStats
-import com.fracta7.csgostats.presentation.main_screen.GunStats
 import com.fracta7.csgostats.presentation.main_screen.MainScreen
-import com.fracta7.csgostats.presentation.main_screen.MapStats
 import com.fracta7.csgostats.presentation.match_history.MatchHistory
 import com.fracta7.csgostats.presentation.ui.theme.Typography
 import com.fracta7.csgostats.presentation.user_stats.UserStats
@@ -35,16 +31,12 @@ fun Navigation() {
 
     var title by remember { mutableStateOf("Steam Statistics") }
     val scope = rememberCoroutineScope()
-    val items = listOf(
-        0,
-        1,
-        2
-    )
+    val items = listOf(0, 1, 2)
     val selectedItem = remember { mutableStateOf(items[0]) }
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.75f)) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -148,15 +140,6 @@ fun Navigation() {
                                 }
                                 composable(route = Screens.AddStat.route) {
                                     AddStatScreen(navController = navController)
-                                }
-                                composable(route = Screens.GeneralStats.route) {
-                                    GeneralStats(navController = navController)
-                                }
-                                composable(route = Screens.GunStats.route) {
-                                    GunStats()
-                                }
-                                composable(route = Screens.MapStats.route) {
-                                    MapStats()
                                 }
                             }
                         }

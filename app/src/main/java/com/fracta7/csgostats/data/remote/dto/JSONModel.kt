@@ -1,4 +1,4 @@
-package com.fracta7.csgostats.domain.model
+package com.fracta7.csgostats.data.remote.dto
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
