@@ -10,12 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fracta7.csgostats.presentation.ui.theme.*
 
 @Composable
-fun CustomProgressBar(percentage: Float) {
+fun CustomProgressBar(percentage: Float, bg: Color, primary: Color) {
     Canvas(
         modifier = Modifier
             .padding(12.dp)
@@ -23,7 +24,7 @@ fun CustomProgressBar(percentage: Float) {
             .fillMaxWidth()
     ) {
         this.drawRoundRect(
-            brush = Brush.horizontalGradient(colors = listOf(CardBg, CardBg)),
+            brush = Brush.horizontalGradient(colors = listOf(bg, bg)),
             size = Size(600f, 32f),
             cornerRadius = CornerRadius(20f, 20f)
         )
@@ -32,15 +33,5 @@ fun CustomProgressBar(percentage: Float) {
             size = Size(percentage * 6f, 32f),
             cornerRadius = CornerRadius(20f, 20f)
         )
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewCustom() {
-    CSGOStatsTheme(darkTheme = true) {
-        Surface() {
-            CustomProgressBar(percentage = 70f)
-        }
     }
 }

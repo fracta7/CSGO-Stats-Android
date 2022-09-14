@@ -32,81 +32,78 @@ fun MatchHistory(
     val activity = LocalContext.current as? Activity
     val viewModel = hiltViewModel<MatchHistoryViewModel>()
 
-    CSGOStatsTheme(darkTheme = true) {
+    Scaffold(content = {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
 
-        Scaffold(content = {
-            Column(
+            Card(
+                shape = Shapes.large,
                 modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
             ) {
-
-                Card(
-                    shape = Shapes.large,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
-                ) {
-                    LazyColumn {
-                        items(viewModel.state.userStats) { userStat ->
-                            MatchCard(
-                                userStat
-                            )
-                        }
+                LazyColumn {
+                    items(viewModel.state.userStats) { userStat ->
+                        MatchCard(
+                            userStat
+                        )
                     }
                 }
-                if (viewModel.state.openDialog) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_error_24),
-                                contentDescription = "warning"
-                            )
-                        },
-                        title = { Text(text = "WARNING!") },
-                        text = { Text(text = "This action will DELETE ALL MATCHES!") },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                viewModel.onEvent(MatchHistoryEvent.ClearHistory)
-                                navController.navigate(Screens.MatchHistory.route)
-                            }) {
-                                Text(text = "Delete", color = error)
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = {
-                                viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
-                            }) {
-                                Text(text = "Cancel")
-                            }
-                        }
-                    )
-                }
             }
-        },
-            floatingActionButton = {
-                Button(
-                    onClick = {
+            if (viewModel.state.openDialog) {
+                AlertDialog(
+                    onDismissRequest = {
                         viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = errorContainer),
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_delete_forever_24),
-                        contentDescription = "delete",
-                        tint = onErrorContainer
-                    )
-                }
-            })
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_error_24),
+                            contentDescription = "warning"
+                        )
+                    },
+                    title = { Text(text = "WARNING!") },
+                    text = { Text(text = "This action will DELETE ALL MATCHES!") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.onEvent(MatchHistoryEvent.ClearHistory)
+                            navController.navigate(Screens.MatchHistory.route)
+                        }) {
+                            Text(text = "Delete", color = error)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
+                        }) {
+                            Text(text = "Cancel")
+                        }
+                    }
+                )
+            }
+        }
+    },
+        floatingActionButton = {
+            Button(
+                onClick = {
+                    viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = errorContainer),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_delete_forever_24),
+                    contentDescription = "delete",
+                    tint = onErrorContainer
+                )
+            }
+        })
 
-
-    }
     BackHandler(onBack = { activity?.finish() })
 }
+
 
 @Composable
 fun MatchCard(

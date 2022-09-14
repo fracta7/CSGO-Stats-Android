@@ -22,13 +22,11 @@ import com.fracta7.csgostats.presentation.ui.theme.CSGOStatsTheme
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun MainScreen(
-    navController: NavController
-) {
+fun MainScreen() {
     val activity = LocalContext.current as? Activity
     val viewModel = hiltViewModel<MainScreenViewModel>()
 
-    CSGOStatsTheme(darkTheme = true) {
+    CSGOStatsTheme {
         BackHandler(onBack = { activity?.finish() })
         Column(
             modifier = Modifier.fillMaxWidth(),

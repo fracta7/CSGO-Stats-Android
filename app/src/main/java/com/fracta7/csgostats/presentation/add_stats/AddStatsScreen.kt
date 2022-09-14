@@ -31,16 +31,16 @@ fun AddStatScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
             shape = Shapes.large,
             modifier = Modifier
-                .size(500.dp, 500.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
                 .padding(12.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceVariant)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
             LazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,

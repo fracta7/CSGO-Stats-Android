@@ -1,16 +1,16 @@
 package com.fracta7.csgostats.presentation.navigation
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -33,24 +33,26 @@ fun Navigation() {
     val scope = rememberCoroutineScope()
     val items = listOf(0, 1, 2)
     val selectedItem = remember { mutableStateOf(items[0]) }
+    val activity = LocalContext.current as? Activity
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.75f)) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(48.dp)
+                Column(
+                    modifier = Modifier.padding(12.dp)
                 ) {
                     Image(
                         painter = painterResource(id = R.mipmap.ic_launcher_round),
-                        contentDescription = ""
+                        contentDescription = "",
+                        modifier = Modifier.padding(horizontal = 12.dp)
                     )
                     Text(
                         text = "CS:GO Statistics",
                         fontSize = Typography.headlineLarge.fontSize,
                         modifier = Modifier.padding(horizontal = 12.dp)
                     )
+                    Divider(modifier = Modifier.fillMaxWidth())
                 }
 
                 items.forEach { item ->
@@ -95,6 +97,19 @@ fun Navigation() {
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                 }
+                Divider(Modifier.fillMaxWidth().padding(12.dp))
+                NavigationDrawerItem(
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_exit_to_app_24),
+                            contentDescription = ""
+                        )
+                    },
+                    label = { Text(text = "Quit") },
+                    selected = false,
+                    onClick = { activity?.finish() },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
             }
         },
         content = {
@@ -110,13 +125,18 @@ fun Navigation() {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_baseline_reorder_24),
-                                    contentDescription = "",
-                                    modifier = Modifier
-                                        .requiredSize(32.dp)
-                                        .clickable { scope.launch { drawerState.open() } }
-                                )
+                                TextButton(onClick = {
+                                    scope.launch { drawerState.open() }
+                                }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(
+                                            id = R.drawable.ic_baseline_reorder_24
+                                        ),
+                                        contentDescription = "",
+                                        modifier = Modifier.requiredSize(32.dp)
+                                    )
+                                }
                                 Text(
                                     text = title,
                                     modifier = Modifier.padding(48.dp),
@@ -129,7 +149,7 @@ fun Navigation() {
                             ) {
                                 composable(route = Screens.MainScreen.route)
                                 {
-                                    MainScreen(navController = navController)
+                                    MainScreen()
                                 }
                                 composable(route = Screens.UserStats.route) {
                                     UserStats(navController = navController)
@@ -149,49 +169,4 @@ fun Navigation() {
 
         }
     )
-}
-
-/*    Scaffold(
-        content = {
-
-
-        },
-        bottomBar = { NavigationAppBar(navController = navController) },
-
-        )
-}*/
-
-@Composable
-fun NavigationAppBar(navController: NavController) {
-    var selectedItem by remember { mutableStateOf(0) }
-    val items = listOf("Steam Stats", "User Stats", "Match History")
-
-    NavigationBar {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                icon = {
-                    if (index == 0) Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_verified_24),
-                        contentDescription = "Verified"
-                    )
-                    if (index == 1) Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_analytics_24),
-                        contentDescription = "Analytics"
-                    )
-                    if (index == 2) Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_reorder_24),
-                        contentDescription = "Reorder"
-                    )
-                },
-                label = { Text(item) },
-                selected = selectedItem == index,
-                onClick = {
-                    selectedItem = index
-                    if (index == 0) navController.navigate(Screens.MainScreen.route)
-                    if (index == 1) navController.navigate(Screens.UserStats.route)
-                    if (index == 2) navController.navigate(Screens.MatchHistory.route)
-                }
-            )
-        }
-    }
 }

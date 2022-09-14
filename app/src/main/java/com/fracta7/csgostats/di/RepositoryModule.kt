@@ -1,6 +1,8 @@
 package com.fracta7.csgostats.di
 
+import com.fracta7.csgostats.data.repository.SteamStatsRepositoryImpl
 import com.fracta7.csgostats.data.repository.UserStatsRepositoryImpl
+import com.fracta7.csgostats.domain.repository.SteamStatsRepository
 import com.fracta7.csgostats.domain.repository.UserStatsRepository
 import dagger.Binds
 import dagger.Module
@@ -13,4 +15,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun repositoryBinder(userStatsRepositoryImpl: UserStatsRepositoryImpl): UserStatsRepository
+
+    @Binds
+    abstract fun userInfoRepository(steamStatsRepositoryImpl: SteamStatsRepositoryImpl): SteamStatsRepository
 }

@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface UserStatsRepository {
     suspend fun getUserStats(): Flow<Resource<List<UserStats>>>
 
+    suspend fun deleteAll()
+
     suspend fun insert(stat: UserStats)
 
     suspend fun clearMatches()

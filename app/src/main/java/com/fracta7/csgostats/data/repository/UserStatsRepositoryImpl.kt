@@ -13,14 +13,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UserStatsRepositoryImpl @Inject constructor(private val db: AppDatabase) :
+class UserStatsRepositoryImpl @Inject constructor(db: AppDatabase) :
     UserStatsRepository {
     private val dao = db.userStatsDao()
-    suspend fun insert(stat: UserStatsEntity) {
-        dao.insertAll(stat)
-    }
 
-    suspend fun deleteAll() {
+    override suspend fun deleteAll() {
         dao.deleteTable()
     }
 

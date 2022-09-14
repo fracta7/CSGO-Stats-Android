@@ -3,6 +3,7 @@ package com.fracta7.csgostats.presentation.custom
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,7 +38,11 @@ fun ProgressBarItem(text: String, percent: Float) {
                 Text(text = text)
 
             }
-            CustomProgressBar(percentage = percent)
+            CustomProgressBar(
+                percentage = percent,
+                bg = MaterialTheme.colorScheme.inverseOnSurface,
+                primary = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

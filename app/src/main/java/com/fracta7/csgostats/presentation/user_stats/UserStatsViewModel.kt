@@ -18,14 +18,25 @@ class UserStatsViewModel @Inject constructor(
 ) : ViewModel() {
 
     var state by mutableStateOf(UserStatsState())
-    var stats: List<UserStats> = emptyList()
 
     init {
+        loadStats()
+    }
+
+    fun onEvent(event: UserStatsEvent) {
+        when (event) {
+            is UserStatsEvent.AddStats -> {
+
+            }
+        }
+    }
+
+    private fun loadStats() {
         viewModelScope.launch {
-            repository.getUserStats().collect { it ->
+            repository.getUserStats().collect {
                 when (it) {
                     is Resource.Success -> {
-                        stats = it.data!!
+                        val stats = (it.data as MutableList<UserStats>?)!!
                         val totalMatches = stats.size
                         var kills = 0
                         var assists = 0
@@ -83,22 +94,52 @@ class UserStatsViewModel @Inject constructor(
                         }
                         val totalKD = kills.toFloat() / deaths.toFloat()
 
-                        if (totalMatches != 0) ctchance =
-                            (startedAsCT.toFloat() / totalMatches.toFloat()) * 100f
-                        if (totalMatches != 0) hspercent = (hs / highestHS) * 100f
-                        if (totalMatches != 0) mvppercent = (averageMVPs / mvps.toFloat()) * 100f
-                        if (totalMatches != 0) killpercent = (averageKills / kills.toFloat()) * 100f
-                        if (totalMatches != 0) assistpercent =
-                            (averageAssists / assists.toFloat()) * 100f
-                        if (totalMatches != 0) deathpercent =
-                            (averageDeaths / deaths.toFloat()) * 100f
-                        if (totalMatches != 0) durationpercent =
-                            (averageDuration / duration.toFloat()) * 100f
-                        val totalkdchance = if (totalKD > 2.0f) 100f else (totalKD / 2.0f) * 100f
+                        if (totalMatches != 0) {
+                            ctchance =
+                                (startedAsCT.toFloat() / totalMatches.toFloat()) * 100f
+                        }
+                        if (totalMatches != 0) {
+                            hspercent = (hs / highestHS) * 100f
+                        }
+                        if (totalMatches != 0) {
+                            mvppercent = (averageMVPs / mvps.toFloat()) * 100f
+                        }
+                        if (totalMatches != 0) {
+                            killpercent = (averageKills / kills.toFloat()) * 100f
+                        }
+                        if (totalMatches != 0) {
+                            assistpercent =
+                                (averageAssists / assists.toFloat()) * 100f
+                        }
+                        if (totalMatches != 0) {
+                            deathpercent =
+                                (averageDeaths / deaths.toFloat()) * 100f
+                        }
+                        if (totalMatches != 0) {
+                            durationpercent =
+                                (averageDuration / duration.toFloat()) * 100f
+                        }
+                        val totalkdchance = if (totalKD > 2.0f) {
+                            100f
+                        } else {
+                            (totalKD / 2.0f) * 100f
+                        }
                         val averagekdchance =
-                            if (averageKD > 2.0f) 100f else (averageKD / 2.0f) * 100f
-                        val dprchance = if (dpr > 120f) 100f else (dpr / 120f) * 100
-                        val maxdprchance = if (maxDPR > 120f) 100f else (maxDPR / 120f) * 100f
+                            if (averageKD > 2.0f) {
+                                100f
+                            } else {
+                                (averageKD / 2.0f) * 100f
+                            }
+                        val dprchance = if (dpr > 120f) {
+                            100f
+                        } else {
+                            (dpr / 120f) * 100
+                        }
+                        val maxdprchance = if (maxDPR > 120f) {
+                            100f
+                        } else {
+                            (maxDPR / 120f) * 100f
+                        }
                         state = state.copy(
                             stats = stats,
                             totalMatches = totalMatches,
@@ -144,14 +185,6 @@ class UserStatsViewModel @Inject constructor(
 
                     }
                 }
-            }
-        }
-    }
-
-    fun onEvent(event: UserStatsEvent) {
-        when (event) {
-            is UserStatsEvent.AddStats -> {
-
             }
         }
     }
