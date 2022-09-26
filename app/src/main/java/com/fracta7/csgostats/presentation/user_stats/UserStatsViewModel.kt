@@ -36,6 +36,7 @@ class UserStatsViewModel @Inject constructor(
             repository.getUserStats().collect {
                 when (it) {
                     is Resource.Success -> {
+                        state = state.copy(showStats = true)
                         val stats = (it.data as MutableList<UserStats>?)!!
                         val totalMatches = stats.size
                         var kills = 0
@@ -179,10 +180,10 @@ class UserStatsViewModel @Inject constructor(
                         )
                     }
                     is Resource.Error -> {
-
+                        state = state.copy(showStats = false)
                     }
                     is Resource.Loading -> {
-
+                        state = state.copy(showStats = false)
                     }
                 }
             }

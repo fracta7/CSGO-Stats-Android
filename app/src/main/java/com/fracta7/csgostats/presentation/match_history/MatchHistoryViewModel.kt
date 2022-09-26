@@ -47,5 +47,4 @@ class MatchHistoryViewModel @Inject constructor(
             }
         }
     }
-
 }

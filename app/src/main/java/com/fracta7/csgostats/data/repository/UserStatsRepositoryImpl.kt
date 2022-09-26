@@ -1,7 +1,6 @@
 package com.fracta7.csgostats.data.repository
 
 import com.fracta7.csgostats.data.local.AppDatabase
-import com.fracta7.csgostats.data.local.user.UserStatsEntity
 import com.fracta7.csgostats.data.mapper.toUserStats
 import com.fracta7.csgostats.data.mapper.toUserStatsEntity
 import com.fracta7.csgostats.domain.model.UserStats
@@ -32,10 +31,11 @@ class UserStatsRepositoryImpl @Inject constructor(db: AppDatabase) :
     override suspend fun getUserStats(): Flow<Resource<List<UserStats>>> {
         return flow {
             val userStats = dao.getAll()
-            if (userStats.isEmpty()) emit(Resource.Error("Repository is empty")) else emit(
-                Resource.Success(
-                    data = userStats.map { it.toUserStats() })
-            )
+            if (userStats.isEmpty()) {
+                emit(Resource.Error("Repository is empty"))
+            } else {
+                emit(Resource.Success(data = userStats.map { it.toUserStats() }))
+            }
         }
     }
 }

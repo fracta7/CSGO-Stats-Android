@@ -28,8 +28,7 @@ import kotlinx.coroutines.launch
 fun Navigation() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-
-    var title by remember { mutableStateOf("Steam Statistics") }
+    var title by remember { mutableStateOf("Charts") }
     val scope = rememberCoroutineScope()
     val items = listOf(0, 1, 2)
     val selectedItem = remember { mutableStateOf(items[0]) }
@@ -59,20 +58,20 @@ fun Navigation() {
                     NavigationDrawerItem(
                         icon = {
                             if (item == 0) Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_verified_24),
+                                painter = painterResource(id = R.drawable.chart_24px),
                                 contentDescription = ""
                             )
                             if (item == 1) Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_analytics_24),
+                                painter = painterResource(id = R.drawable.stats_24px),
                                 contentDescription = ""
                             )
                             if (item == 2) Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_reorder_24),
+                                painter = painterResource(id = R.drawable.menu_24px),
                                 contentDescription = ""
                             )
                         },
                         label = {
-                            if (item == 0) Text(text = "Steam Statistics")
+                            if (item == 0) Text(text = "Charts")
                             if (item == 1) Text(text = "User Statistics")
                             if (item == 2) Text(text = "Match History")
                         },
@@ -82,7 +81,7 @@ fun Navigation() {
                             scope.launch { drawerState.close() }
                             if (selectedItem.value == 0) {
                                 navController.navigate(Screens.MainScreen.route)
-                                title = "Steam Statistics"
+                                title = "Charts"
                             }
                             if (selectedItem.value == 1) {
                                 navController.navigate(Screens.UserStats.route)
@@ -92,7 +91,6 @@ fun Navigation() {
                                 navController.navigate(Screens.MatchHistory.route)
                                 title = "Match History"
                             }
-
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
@@ -101,7 +99,7 @@ fun Navigation() {
                 NavigationDrawerItem(
                     icon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_exit_to_app_24),
+                            painter = painterResource(id = R.drawable.exit),
                             contentDescription = ""
                         )
                     },
@@ -131,7 +129,7 @@ fun Navigation() {
                                 ) {
                                     Icon(
                                         painter = painterResource(
-                                            id = R.drawable.ic_baseline_reorder_24
+                                            id = R.drawable.menu_24px
                                         ),
                                         contentDescription = "",
                                         modifier = Modifier.requiredSize(32.dp)
@@ -164,9 +162,7 @@ fun Navigation() {
                             }
                         }
                     }
-
                 })
-
         }
     )
 }

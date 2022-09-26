@@ -3,6 +3,7 @@ package com.fracta7.csgostats.presentation.user_stats
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -80,53 +82,65 @@ fun UserStats(
 
     Scaffold(
         content = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Card(
-                    shape = Shapes.large,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.background
-                    )
+            AnimatedVisibility(viewModel.state.showStats) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                        item {
-                            Card(shape = Shapes.large) {
-                                LazyRow(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    items(briefStatItems.size) {
-                                        BriefStats(
-                                            text = briefStatItems[it].first,
-                                            painter = painterResource(id = briefStatItems[it].second)
-                                        )
+                    Card(
+                        shape = Shapes.large,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.background
+                        )
+                    ) {
+                        LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+                            item {
+                                Card(shape = Shapes.large) {
+                                    LazyRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        items(briefStatItems.size) {
+                                            BriefStats(
+                                                text = briefStatItems[it].first,
+                                                painter = painterResource(id = briefStatItems[it].second)
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                        item {
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-                        items(textsWithPercent.size) {
-                            ProgressBarItem(
-                                text = textsWithPercent[it].first,
-                                percent = textsWithPercent[it].second
-                            )
-                            Spacer(modifier = Modifier.padding(4.dp))
-                        }
-                        items(texts.size) {
-                            RegularItem(text = texts[it])
-                            Spacer(modifier = Modifier.padding(4.dp))
+                            item {
+                                Spacer(modifier = Modifier.padding(4.dp))
+                            }
+                            items(textsWithPercent.size) {
+                                ProgressBarItem(
+                                    text = textsWithPercent[it].first,
+                                    percent = textsWithPercent[it].second
+                                )
+                                Spacer(modifier = Modifier.padding(4.dp))
+                            }
+                            items(texts.size) {
+                                RegularItem(text = texts[it])
+                                Spacer(modifier = Modifier.padding(4.dp))
+                            }
                         }
                     }
+                }
+            }
+
+            AnimatedVisibility(!viewModel.state.showStats) {
+                Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "No stats are available. Please add a new match",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontStyle = FontStyle.Italic
+                    )
                 }
             }
         },
@@ -135,11 +149,10 @@ fun UserStats(
                 navController.navigate(Screens.AddStat.route)
             }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                    painter = painterResource(id = R.drawable.add_24px),
                     contentDescription = "Icon add"
                 )
             }
         }
     )
 }
-

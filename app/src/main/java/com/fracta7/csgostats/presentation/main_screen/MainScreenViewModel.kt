@@ -4,34 +4,38 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.fracta7.csgostats.data.mapper.toStats
-import com.fracta7.csgostats.data.remote.SteamStatApi
-import com.fracta7.csgostats.data.remote.dto.JSONModel
+import androidx.lifecycle.viewModelScope
+import com.fracta7.csgostats.domain.model.UserStats
+import com.fracta7.csgostats.domain.repository.UserStatsRepository
+import com.fracta7.csgostats.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
-    private val steamStatApi: SteamStatApi
+    private val repository: UserStatsRepository
 ) : ViewModel() {
     var state by mutableStateOf(MainScreenState())
 
-    fun onEvent(event: MainScreenEvent) {
-        when (event) {
-            is MainScreenEvent.NetworkCall -> {
-                steamStatApi.getSteamStats().enqueue(object : Callback<JSONModel> {
-                    override fun onResponse(call: Call<JSONModel>, response: Response<JSONModel>) {
-                        val remoteData = response.body()?.playerStats?.stats?.map { it.toStats() }
-                        state = remoteData?.let { state.copy(stats = it, callSucceeded = true, status = "Loaded") }!!
-                    }
+    init {
+        viewModelScope.launch {
+            loadStats()
+        }
+    }
 
-                    override fun onFailure(call: Call<JSONModel>, t: Throwable) {
-                        state = state.copy(callSucceeded = false, status = "An error occurred. $t")
-                    }
-                })
+    suspend fun loadStats() {
+        repository.getUserStats().collect {
+            state = when (it) {
+                is Resource.Error -> {
+                    state.copy(status = "Error", showStats = false)
+                }
+                is Resource.Loading -> {
+                    state.copy(status = "Loading", showStats = false)
+                }
+                is Resource.Success -> {
+                    state.copy(status = "Done", stats = it.data!!, showStats = true)
+                }
             }
         }
     }

@@ -38,4 +38,5 @@ data class UserStatsState(
     val averagekdchance: Float = 0f,
     val dprchance: Float = 0f,
     val maxdprchance: Float = 0f,
+    val showStats: Boolean = false
 )

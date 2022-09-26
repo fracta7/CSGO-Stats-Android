@@ -3,6 +3,7 @@ package com.fracta7.csgostats.presentation.match_history
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,55 +34,67 @@ fun MatchHistory(
     val viewModel = hiltViewModel<MatchHistoryViewModel>()
 
     Scaffold(content = {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-
-            Card(
-                shape = Shapes.large,
+        AnimatedVisibility(!viewModel.state.isDbEmpty) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LazyColumn {
-                    items(viewModel.state.userStats) { userStat ->
-                        MatchCard(
-                            userStat
-                        )
+
+                Card(
+                    shape = Shapes.large,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+                ) {
+                    LazyColumn {
+                        items(viewModel.state.userStats) { userStat ->
+                            MatchCard(
+                                userStat
+                            )
+                        }
                     }
                 }
-            }
-            if (viewModel.state.openDialog) {
-                AlertDialog(
-                    onDismissRequest = {
-                        viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_error_24),
-                            contentDescription = "warning"
-                        )
-                    },
-                    title = { Text(text = "WARNING!") },
-                    text = { Text(text = "This action will DELETE ALL MATCHES!") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            viewModel.onEvent(MatchHistoryEvent.ClearHistory)
-                            navController.navigate(Screens.MatchHistory.route)
-                        }) {
-                            Text(text = "Delete", color = error)
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {
+                if (viewModel.state.openDialog) {
+                    AlertDialog(
+                        onDismissRequest = {
                             viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
-                        }) {
-                            Text(text = "Cancel")
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_baseline_error_24),
+                                contentDescription = "warning"
+                            )
+                        },
+                        title = { Text(text = "WARNING!") },
+                        text = { Text(text = "This action will DELETE ALL MATCHES!") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.onEvent(MatchHistoryEvent.ClearHistory)
+                                navController.navigate(Screens.MatchHistory.route)
+                            }) {
+                                Text(text = "Delete", color = error)
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                viewModel.onEvent(MatchHistoryEvent.ToggleDialog)
+                            }) {
+                                Text(text = "Cancel")
+                            }
                         }
-                    }
+                    )
+                }
+            }
+        }
+
+        AnimatedVisibility(viewModel.state.isDbEmpty) {
+            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = "No stats are available. Please add a new match",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontStyle = FontStyle.Italic
                 )
             }
         }
@@ -94,7 +107,7 @@ fun MatchHistory(
                 colors = ButtonDefaults.buttonColors(containerColor = errorContainer),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_delete_forever_24),
+                    painter = painterResource(id = R.drawable.delete_24px),
                     contentDescription = "delete",
                     tint = onErrorContainer
                 )
@@ -124,15 +137,23 @@ fun MatchCard(
         ) {
             var painter: Int = R.drawable.map_icon_lobby_mapveto
             when (userStats.map) {
-                0 -> painter = R.drawable.collection_icon_de_dust2
+                0 -> painter = R.drawable.map_icon_de_dust2
                 1 -> painter = R.drawable.collection_icon_de_inferno
-                2 -> painter = R.drawable.collection_icon_de_mirage
-                3 -> painter = R.drawable.collection_icon_de_nuke
-                4 -> painter = R.drawable.collection_icon_cs_office
-                5 -> painter = R.drawable.collection_icon_de_overpass
-                6 -> painter = R.drawable.collection_icon_de_train
-                7 -> painter = R.drawable.collection_icon_de_vertigo
-                8 -> painter = R.drawable.collection_icon_none
+                2 -> painter = R.drawable.map_icon_de_mirage
+                3 -> painter = R.drawable.map_icon_de_nuke
+                4 -> painter = R.drawable.map_icon_cs_office
+                5 -> painter = R.drawable.map_icon_de_overpass
+                6 -> painter = R.drawable.map_icon_de_train
+                7 -> painter = R.drawable.map_icon_de_vertigo
+                8 -> painter = R.drawable.map_icon_cs_agency
+                9 -> painter = R.drawable.map_icon_de_ancient
+                10 -> painter = R.drawable.map_icon_de_cache
+                11 -> painter = R.drawable.map_icon_de_cbble
+                12 -> painter = R.drawable.map_icon_de_lake
+                13 -> painter = R.drawable.map_icon_de_safehouse
+                14 -> painter = R.drawable.map_icon_de_shortdust
+                15 -> painter = R.drawable.map_icon_de_shortnuke
+                16 -> painter = R.drawable.map_icon_lobby_mapveto
             }
 
             Image(
